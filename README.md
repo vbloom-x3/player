@@ -37,7 +37,7 @@ mutagen
 
 ---
 
-## 🐇 Installation
+## Installation
 
 You can run it directly, or “install” it to make it callable from anywhere:
 
@@ -51,11 +51,11 @@ Then just type:
 player
 ```
 
-…and enjoy your music! 🎶✨
+…and enjoy your music!
 
 ---
 
-## 🛠 Usage
+## Usage
 
 * Run the player:
 
