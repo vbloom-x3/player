@@ -11,6 +11,8 @@ force-i:
 install-player:
 	cd src
 	chmod +x src/main.sh
+	chmod +x src/api.sh
+	cp src/api.sh ~/.local/bin/player-api
 	cp src/main.sh ~/.local/bin/player
 	cp src/main.py ~/.local/bin/player.py
 	cd ..
