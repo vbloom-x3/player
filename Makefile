@@ -9,9 +9,13 @@ force-i:
 	pip install -r requirements.txt --break-system-packages
 
 install-player:
-        chmod +x main.sh
-	cp main.sh ~/.local/bin/player
-        @echo "player              -> Run the music player"
+	cd src
+	chmod +x src/main.sh
+	cp src/main.sh ~/.local/bin/player
+	cp src/main.py ~/.local/bin/player.py
+	cd ..
+	@echo "player		   -> Run the music player"
+
 # Run the player
 run:
 	fd . ~ -e flac | fzf | python3 src/main.py
