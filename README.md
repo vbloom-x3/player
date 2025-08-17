@@ -1,7 +1,3 @@
-Oooohhh\~ yesss, a README that’s cute, clear, and cozy like a little bunny blanket! 🐰✨ Here’s a draft for your music player project:
-
----
-
 # Player - A Music Player
 
 Welcome to **Player**, a lightweight, terminal-based music player made with love in Python! Perfect for vibing to your favorite `.flac` tracks with a CLI interface.
@@ -10,13 +6,21 @@ Welcome to **Player**, a lightweight, terminal-based music player made with love
 
 ##  Features
 
-* Play high-quality audio (`.flac`, `.mp3`) right from your terminal
+* Play high-quality audio (`.flac`) right from your terminal
 * Simple and intuitive CLI controls
 * Easy setup and installation
+* Based on libVLC
 
 ---
 
 ##  Requirements
+
+Make sure you have **fzf** installed!
+
+```bash
+# for Arch Linux-based distros
+sudo pacman -S fzf
+```
 
 Make sure you have **Python 3** installed! Then install the dependencies:
 
