@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import vlc
 import time
 import shutil
