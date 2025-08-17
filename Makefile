@@ -2,8 +2,11 @@
 all: install run req
 
 # Install dependencies
-req:
+install:
 	pip install -r requirements.txt
+
+force-i:
+	pip install -r requirements.txt --break-system-packages
 
 # Run the player
 run:
