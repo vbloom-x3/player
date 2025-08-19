@@ -90,7 +90,7 @@ try:
 
     # Print final newline and completion message
     print()  # Move to next line
-    print("Playback finished!")
+    print("Playback completed!")
 
 except KeyboardInterrupt:
     print()  # Move to next line
