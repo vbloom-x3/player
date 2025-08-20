@@ -100,10 +100,9 @@ def play_audio(audio_file, display_progress=True):
         
         if display_progress:
             print()  # Move to next line
-        print("Playback completed!")
     
     except KeyboardInterrupt:
-        print("\nStopped!")
+        print("\n")
     
     except Exception as e:
         print(f"\nError: {e}")
