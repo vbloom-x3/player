@@ -55,9 +55,7 @@ def play_audio(audio_file, display_progress=True):
     
     # Initialize VLC player
     player = vlc.MediaPlayer(audio_file)
-    player.play()
-    time.sleep(0.5)  # give VLC time to parse
-    
+    player.play()    
     total = player.get_length()
     retry_count = 0
     while total <= 0 and retry_count < 50:
