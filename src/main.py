@@ -2,23 +2,18 @@ import vlc
 import time
 import shutil
 from mutagen.flac import FLAC
-import sys
 import os
 
 
 def get_flac_metadata(audio_file):
     """
     Fetch FLAC metadata for the given file.
-    
-    Returns:
-        dict: {title, artist, album, full_title}
     """
     audio = FLAC(audio_file)
     title = audio.get("title", ["Unknown Title"])[0]
     artist = audio.get("artist", ["Unknown Artist"])[0]
     album = audio.get("album", ["Unknown Album"])[0]
     full_title = f"{album} -> {title} — {artist}"
-    
     return {
         "title": title,
         "artist": artist,
@@ -29,7 +24,7 @@ def get_flac_metadata(audio_file):
 
 def format_time(ms):
     """
-    Format milliseconds to M:SS.
+    Convert milliseconds to M:SS.
     """
     if ms <= 0:
         return "0:00"
@@ -39,85 +34,69 @@ def format_time(ms):
     return f"{mins}:{secs:02d}"
 
 
-def play_audio(audio_file, display_progress=True):
-    """
-    Play a FLAC audio file using VLC.
-    
-    Args:
-        audio_file (str): Path to the FLAC file.
-        display_progress (bool): Whether to show progress bar in terminal.
-    """
-    if not os.path.exists(audio_file):
-        raise FileNotFoundError(f"File not found: {audio_file}")
-    
-    metadata = get_flac_metadata(audio_file)
-    print(f"Now playing: {metadata['full_title']}")
-    
-    # Initialize VLC player
-    player = vlc.MediaPlayer(audio_file)
-    player.play()
-    total = player.get_length()
-    retry_count = 0
-    while total <= 0 and retry_count < 50:
-        time.sleep(0.1)
-        total = player.get_length()
-        retry_count += 1
-    
-    if total <= 0:
-        total = 1  # Prevent division by zero
-    
-    try:
+class GaplessPlayer:
+    def __init__(self, playlist=None, display_progress=True):
+        self.playlist = playlist or []
+        self.display_progress = display_progress
+        self.player = vlc.MediaPlayer()
+        self.current_index = 0
+        self.event_manager = self.player.event_manager()
+        self.event_manager.event_attach(
+            vlc.EventType.MediaPlayerEndReached, self._on_track_end
+        )
+
+    def _on_track_end(self, event):
+        self.current_index += 1
+        if self.current_index < len(self.playlist):
+            self._play_current()
+        else:
+            print("\nPlaylist completed!")
+
+    def _play_current(self):
+        track = self.playlist[self.current_index]
+        if not os.path.exists(track):
+            print(f"File not found: {track}")
+            return
+        metadata = get_flac_metadata(track)
+        print(f"\nNow playing: {metadata['full_title']}")
+        self.player.set_media(vlc.Media(track))
+        self.player.play()
+
+    def play_all(self):
+        if not self.playlist:
+            print("Playlist is empty!")
+            return
+        self._play_current()
+        self._progress_loop()
+
+    def _progress_loop(self):
         last_progress_line = ""
-        
         while True:
-            state = player.get_state()
-            if state in [vlc.State.Ended, vlc.State.Error]:
+            state = self.player.get_state()
+            if state == vlc.State.Ended and self.current_index >= len(self.playlist) - 1:
                 break
-            
-            current = player.get_time()
-            progress = min(current / total, 1.0) if total > 0 else 0
-            
-            if display_progress:
+            if state in [vlc.State.Error, vlc.State.Stopped]:
+                break
+
+            if self.display_progress:
+                current = self.player.get_time()
+                total = self.player.get_length()
+                if total <= 0:
+                    total = 1
+                progress = min(current / total, 1.0)
                 width = shutil.get_terminal_size().columns
                 bar_width = max(width - 30, 10)
                 filled = int(progress * bar_width)
                 bar = "=" * filled + " " * (bar_width - filled)
-                
                 progress_text = f"[{bar}] {int(progress*100)}% | {format_time(current)}/{format_time(total)}"
-                
                 if len(progress_text) > width:
                     progress_display = progress_text[:width]
                 else:
                     progress_display = progress_text.ljust(width)
-                
+
                 if progress_display != last_progress_line:
                     print(f"\r{progress_display}", end='', flush=True)
                     last_progress_line = progress_display
-            
+
             time.sleep(0.05)
-        
-        if display_progress:
-            print()  # Move to next line
-        print("Playback completed!")
-    
-    except KeyboardInterrupt:
-        print("\nStopped!")
-    
-    except Exception as e:
-        print(f"\nError: {e}")
-    
-    finally:
-        player.stop()
-
-
-def main():
-    if len(sys.argv) > 1:
-        audio_file = sys.argv[1]
-    else:
-        audio_file = sys.stdin.readline().strip()
-    
-    play_audio(audio_file)
-
-
-if __name__ == "__main__":
-    main()
+        print("\nPlayback completed!")
