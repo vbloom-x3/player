@@ -1,9 +1,9 @@
+# player.py
 import vlc
 import time
 import shutil
-from mutagen.flac import FLAC
 import os
-
+from mutagen.flac import FLAC
 
 def get_flac_metadata(audio_file):
     """
@@ -21,7 +21,6 @@ def get_flac_metadata(audio_file):
         "full_title": full_title
     }
 
-
 def format_time(ms):
     """
     Convert milliseconds to M:SS.
@@ -32,7 +31,6 @@ def format_time(ms):
     mins = seconds // 60
     secs = seconds % 60
     return f"{mins}:{secs:02d}"
-
 
 class GaplessPlayer:
     def __init__(self, playlist=None, display_progress=True):
@@ -57,10 +55,36 @@ class GaplessPlayer:
         if not os.path.exists(track):
             print(f"File not found: {track}")
             return
+
         metadata = get_flac_metadata(track)
         print(f"\nNow playing: {metadata['full_title']}")
+
+        # Look for and display cover art
+        cover_path = self.find_cover_image(os.path.dirname(track))
+        if cover_path:
+            try:
+                from img import image_to_ascii
+                image_to_ascii(cover_path)
+            except Exception as e:
+                print(f"Could not display cover art: {e}")
+
         self.player.set_media(vlc.Media(track))
         self.player.play()
+
+    def find_cover_image(self, directory, names=("cover.jpg", "folder.jpg", "cover.png", "folder.png")):
+        """
+        Look for a cover image in the given directory.
+        """
+        for name in names:
+            path = os.path.join(directory, name)
+            if os.path.isfile(path):
+                return path
+        # Fallback: any file starting with 'cover' or 'folder' and has image extension
+        for file in os.listdir(directory):
+            lower_file = file.lower()
+            if lower_file.startswith(("cover", "folder")) and lower_file.endswith((".jpg", ".jpeg", ".png")):
+                return os.path.join(directory, file)
+        return None
 
     def play_all(self):
         if not self.playlist:
