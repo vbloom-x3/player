@@ -28,7 +28,7 @@ Make sure you have **Python 3** installed! Then install the dependencies:
 pip install -r requirements.txt
 ```
 
-**Suggested dependencies:**
+**Dependencies:**
 
 ```
 python-vlc
